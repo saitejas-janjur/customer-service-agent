@@ -4,9 +4,7 @@ version = "0.1.0"
 description = "Production-grade customer service AI agent using LangChain and LangGraph"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [
-  { name = "Your Name" }
-]
+authors = [{ name = "Your Name" }]
 
 dependencies = [
   # Core
@@ -24,6 +22,10 @@ dependencies = [
   "rank-bm25>=0.2.2",
   "tiktoken>=0.6.0",
 
+  # Ingestion
+  "pypdf>=4.0.0",
+  "beautifulsoup4>=4.12.3",
+
   # Utilities
   "pydantic>=2.6.0",
   "pydantic-settings>=2.2.1",
@@ -35,8 +37,25 @@ dependencies = [
   "langsmith>=0.1.20"
 ]
 
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.6.0",
+  "mypy>=1.10.0"
+]
+
 [tool.black]
 line-length = 80
 
 [tool.isort]
 profile = "black"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.setuptools.package-dir]
+"" = "."
