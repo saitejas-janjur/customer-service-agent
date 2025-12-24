@@ -30,4 +30,4 @@ Production-grade customer service chat agent built with:
 
 ## Status
 
-Phase 0 complete: foundation & configuration.
+Phase 1 complete: Data & RAG Foundations.
