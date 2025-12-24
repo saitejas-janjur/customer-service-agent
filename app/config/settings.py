@@ -25,16 +25,21 @@ class Settings(BaseSettings):
         default_factory=lambda: _default_project_root() / "data" / "processed"
     )
 
+    # Audit logs (tool calls, etc.)
+    audit_dir: Path = Field(
+        default_factory=lambda: _default_project_root()
+        / "data"
+        / "processed"
+        / "audit"
+    )
+
     # OpenAI
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
 
     # LangSmith
-    langsmith_api_key: str | None = Field(
-        default=None, env="LANGSMITH_API_KEY"
-    )
+    langsmith_api_key: str | None = Field(default=None, env="LANGSMITH_API_KEY")
     langsmith_project: str | None = Field(
-        default="customer-service-agent",
-        env="LANGSMITH_PROJECT",
+        default="customer-service-agent", env="LANGSMITH_PROJECT"
     )
 
     # Models
@@ -50,11 +55,19 @@ class Settings(BaseSettings):
     vector_top_k: int = 8
     bm25_top_k: int = 8
     final_top_k: int = 5
-    hybrid_alpha: float = 0.6  # weight on vector vs bm25
+    hybrid_alpha: float = 0.6
 
-    # Optional reranking (Phase 1 supports LLM rerank)
+    # Optional reranking
     enable_rerank: bool = False
     rerank_top_n: int = 8
+
+    # Tools: runtime controls
+    tool_timeout_seconds: float = 8.0
+    tool_max_retries: int = 2
+
+    # Tools: policies (enforced in code, not prompts)
+    refund_max_amount_usd: float = 100.0
+    refund_window_days: int = 30
 
     class Config:
         env_file = ".env"
