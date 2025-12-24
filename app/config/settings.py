@@ -8,7 +8,6 @@ from pydantic_settings import BaseSettings
 
 
 def _default_project_root() -> Path:
-    # settings.py lives in app/config/settings.py -> repo root is 2 parents up
     return Path(__file__).resolve().parents[2]
 
 
@@ -43,10 +42,19 @@ class Settings(BaseSettings):
     response_model: str = "gpt-4.1"
     embedding_model: str = "text-embedding-3-small"
 
-    # Retrieval / Chunking
+    # Chunking
     chunk_size: int = 512
     chunk_overlap: int = 64
-    top_k: int = 5
+
+    # Retrieval (hybrid)
+    vector_top_k: int = 8
+    bm25_top_k: int = 8
+    final_top_k: int = 5
+    hybrid_alpha: float = 0.6  # weight on vector vs bm25
+
+    # Optional reranking (Phase 1 supports LLM rerank)
+    enable_rerank: bool = False
+    rerank_top_n: int = 8
 
     class Config:
         env_file = ".env"
