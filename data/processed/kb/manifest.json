@@ -1,0 +1,21 @@
+{
+  "built_at": "2025-12-24T02:28:43.885776+00:00",
+  "raw_dir": "/Users/saitejasjanjur/Documents/Side Projects/customer-service-agent/data/raw",
+  "processed_dir": "/Users/saitejasjanjur/Documents/Side Projects/customer-service-agent/data/processed",
+  "chunk_size": 512,
+  "chunk_overlap": 64,
+  "embedding_model": "text-embedding-3-small",
+  "counts": {
+    "loaded": {
+      "docs": 1,
+      "chars": 121
+    },
+    "normalized": {
+      "docs": 1,
+      "chars": 121
+    },
+    "chunks": 1,
+    "skipped_files": 0
+  },
+  "skipped_files": []
+}
