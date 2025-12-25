@@ -1,14 +1,3 @@
-"""
-Agent prompts.
-
-We keep prompts in their own module so:
-- prompt changes are reviewable
-- prompt logic doesn't get mixed into tool or execution code
-
-This is a ReAct-style prompt: the agent can think/act/observe in a loop.
-The user will only see the final answer.
-"""
-
 from __future__ import annotations
 
 from langchain_core.prompts import PromptTemplate
@@ -18,11 +7,10 @@ def build_react_prompt() -> PromptTemplate:
     """
     ReAct prompt template.
 
-    Variables required by LangChain create_react_agent:
-    - tools
-    - tool_names
-    - input
-    - agent_scratchpad
+    LangChain's default ReAct parser treats Action Input as a STRING.
+    So we instruct the model to pass either:
+    - a plain string (for some tools)
+    - OR a JSON object string (recommended for multi-field tools)
     """
     template = """
 You are a customer service assistant for an e-commerce company.
@@ -45,9 +33,12 @@ TOOL USAGE FORMAT (ReAct):
 Question: the user question
 Thought: what you should do next (not shown to user)
 Action: the action to take, must be one of [{tool_names}]
-Action Input: a JSON object with the tool arguments
+Action Input: a SINGLE STRING.
+  - For simple tools, the string can be a plain id like: ord_XYZ78901
+  - For multi-field tools, the string should be a JSON object like:
+    {{"order_id":"ord_XYZ78901","amount_usd":50,"reason":"Damaged item"}}
 Observation: the tool result
-... (repeat Thought/Action/Action Input/Observation as needed)
+... (repeat as needed)
 Final: your final answer to the user
 
 IMPORTANT:
