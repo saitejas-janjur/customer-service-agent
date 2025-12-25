@@ -25,7 +25,7 @@ class Settings(BaseSettings):
         default_factory=lambda: _default_project_root() / "data" / "processed"
     )
 
-    # Audit logs (tool calls, etc.)
+    # Audit logs
     audit_dir: Path = Field(
         default_factory=lambda: _default_project_root()
         / "data"
@@ -65,9 +65,14 @@ class Settings(BaseSettings):
     tool_timeout_seconds: float = 8.0
     tool_max_retries: int = 2
 
-    # Tools: policies (enforced in code, not prompts)
+    # Tools: policies
     refund_max_amount_usd: float = 100.0
     refund_window_days: int = 30
+
+    # Agent behavior
+    agent_max_iterations: int = 5
+    agent_verbose: bool = False
+    confidence_threshold: float = 0.75
 
     class Config:
         env_file = ".env"
