@@ -1,22 +1,10 @@
-"""
-Phase 2 smoke test.
-
-Run:
-  python scripts/tool_smoke_test.py
-
-Expected:
-- Tool list
-- Order status + shipment tracking results
-- Refund policy enforcement (cap/window)
-- Contact update and password reset flow
-"""
-
 from __future__ import annotations
 
 import asyncio
 from uuid import uuid4
 
 from app.config import get_settings
+from app.tools.audit import ToolAuditLogger
 from app.tools.executor import ToolCall, ToolExecutor
 from app.tools.factory import build_tool_registry
 from app.tools.types import RequestId, ToolContext, UserId
@@ -28,7 +16,9 @@ async def main() -> None:
     setup_logging(s.log_level)
 
     registry, _store = build_tool_registry(s)
-    executor = ToolExecutor(registry=registry, settings=s)
+    audit = ToolAuditLogger(audit_dir=s.audit_dir)
+
+    executor = ToolExecutor(registry=registry, settings=s, audit_logger=audit)
 
     ctx = ToolContext(
         user_id=UserId("user_123"),
@@ -37,25 +27,21 @@ async def main() -> None:
     )
 
     print("Registered tools:", registry.names())
+    print(f"Audit log: {s.audit_dir / 'tool_calls.jsonl'}")
     print("")
 
-    # 1) Get order status
     out1 = await executor.execute(
-        ctx,
-        ToolCall(name="get_order_status", args={"order_id": "ord_XYZ78901"}),
+        ctx, ToolCall(name="get_order_status", args={"order_id": "ord_XYZ78901"})
     )
     print("get_order_status:", out1.model_dump())
     print("")
 
-    # 2) Track shipment (via order_id)
     out2 = await executor.execute(
-        ctx,
-        ToolCall(name="track_shipment", args={"order_id": "ord_XYZ78901"}),
+        ctx, ToolCall(name="track_shipment", args={"order_id": "ord_XYZ78901"})
     )
     print("track_shipment:", out2.model_dump())
     print("")
 
-    # 3) Try refund above policy cap (should fail)
     try:
         await executor.execute(
             ctx,
@@ -72,7 +58,6 @@ async def main() -> None:
         print("issue_refund (expected failure):", type(e).__name__, str(e))
     print("")
 
-    # 4) Refund within cap (should pass)
     out4 = await executor.execute(
         ctx,
         ToolCall(
@@ -88,18 +73,13 @@ async def main() -> None:
     print("issue_refund:", out4.model_dump())
     print("")
 
-    # 5) Update contact
     out5 = await executor.execute(
         ctx,
-        ToolCall(
-            name="update_contact",
-            args={"new_email": "customer+new@example.com"},
-        ),
+        ToolCall(name="update_contact", args={"new_email": "customer+new@example.com"}),
     )
     print("update_contact:", out5.model_dump())
     print("")
 
-    # 6) Initiate password reset
     out6 = await executor.execute(
         ctx,
         ToolCall(
