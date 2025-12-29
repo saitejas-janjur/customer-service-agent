@@ -1,11 +1,3 @@
-"""
-CLI runner for the Phase 3 ReAct agent.
-
-Run examples:
-  python scripts/chat_react.py --user-id user_123 --message "Where is my order ord_XYZ78901?"
-  python scripts/chat_react.py --user-id user_123 --message "What is the refund window?"
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -26,10 +18,11 @@ async def main() -> None:
     args = parser.parse_args()
 
     s = get_settings()
-    if args.verbose:
-        s.agent_verbose = True  # simple override for CLI usage
-
     setup_logging(s.log_level)
+
+    # Optional CLI verbosity
+    if args.verbose:
+        s.agent_verbose = True
 
     agent = CustomerServiceReActAgent(s)
 
@@ -44,7 +37,15 @@ async def main() -> None:
     print("\nANSWER\n------")
     print(result.answer)
 
-    print("\nDEBUG: intermediate steps count =", len(result.intermediate_steps))
+    print("\nCONFIDENCE\n----------")
+    print(f"confidence={result.confidence:.2f} needs_human={result.needs_human}")
+    if result.reasons:
+        print("reasons:")
+        for r in result.reasons[:6]:
+            print("-", r)
+
+    print("\nDEBUG\n-----")
+    print("intermediate steps count =", len(result.intermediate_steps))
 
 
 if __name__ == "__main__":
