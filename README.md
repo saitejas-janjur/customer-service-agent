@@ -30,4 +30,8 @@ Production-grade customer service chat agent built with:
 
 ## Status
 
+PHASE 0 complete: Project Foundation.
 Phase 1 complete: Data & RAG Foundations.
+PHASE 2 complete: Tooling & Business Logic.
+PHASE 3 complete: Agent Reasoning (LangChain).
+PHASE 4 In Progress: LangGraph Orchestration
