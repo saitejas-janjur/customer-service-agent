@@ -9,13 +9,13 @@ The core LLM loop:
 
 from __future__ import annotations
 
-from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from app.agent.tools_adapter import build_langchain_tools
 from app.config import Settings
 from app.graph.state import AgentState
 from app.llm.models import build_reasoning_llm
+from app.memory.trimming import trim_conversation_history
 from app.tools.executor import ToolExecutor
 from app.tools.factory import build_tool_registry
 from app.tools.types import ToolContext
@@ -24,8 +24,6 @@ from app.tools.types import ToolContext
 async def agent_node(state: AgentState, settings: Settings) -> dict:
     # 1. Setup Context & Tools
     registry, _store = build_tool_registry(settings)
-    # Note: We create a dummy logger/executor here just to get the tool definitions.
-    # The actual execution happens in the 'tools_node'.
     executor = ToolExecutor(registry=registry, settings=settings)
     
     ctx = ToolContext(
@@ -34,12 +32,9 @@ async def agent_node(state: AgentState, settings: Settings) -> dict:
         actor="customer"
     )
     
-    # We intentionally exclude the 'search_knowledge_base' tool here because
-    # retrieval is handled by the explicit retrieval_node upstream.
     tools = build_langchain_tools(executor=executor, ctx=ctx, enable_kb_tool=False)
     
     # 2. Build Prompt
-    # We inject retrieved docs into the system prompt if they exist.
     docs = state.get("retrieved_docs", [])
     context_str = ""
     if docs:
@@ -62,12 +57,18 @@ async def agent_node(state: AgentState, settings: Settings) -> dict:
         MessagesPlaceholder(variable_name="messages"),
     ])
 
-    # 3. Call Model
+    # 3. Memory Management (Trimming)
+    # We apply trimming *before* sending to model, but we do NOT modify 
+    # the state["messages"] permanently (we keep full history in DB).
+    # We only trim what we send to the LLM.
+    messages_to_send = trim_conversation_history(state["messages"], settings)
+
+    # 4. Call Model
     llm = build_reasoning_llm(settings)
     llm_with_tools = llm.bind_tools(tools)
     
     chain = prompt | llm_with_tools
     
-    response = await chain.ainvoke({"messages": state["messages"]})
+    response = await chain.ainvoke({"messages": messages_to_send})
     
     return {"messages": [response]}
