@@ -19,7 +19,7 @@ Production-grade customer service chat agent built with:
 
 3. Configure environment:
    cp .env.example .env
-   # Fill in your API keys
+   Fill in your API keys
 
 ## Project Structure
 
