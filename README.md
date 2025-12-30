@@ -11,15 +11,15 @@ Production-grade customer service chat agent built with:
 ## Setup
 
 1. Create virtual environment:
-   python3.11 -m venv .venv
-   source .venv/bin/activate
+   - python3.11 -m venv .venv
+   - source .venv/bin/activate
 
 2. Install dependencies:
-   pip install -e .
+   - pip install -e .
 
 3. Configure environment:
-   cp .env.example .env
-   Fill in your API keys
+   - cp .env.example .env
+   - Fill in your API keys
 
 ## Project Structure
 
