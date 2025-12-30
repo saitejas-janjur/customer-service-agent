@@ -1,3 +1,6 @@
+"""
+Settings update: Add persistence path and memory limits.
+"""
 from __future__ import annotations
 
 from functools import lru_cache
@@ -23,6 +26,11 @@ class Settings(BaseSettings):
     )
     processed_data_dir: Path = Field(
         default_factory=lambda: _default_project_root() / "data" / "processed"
+    )
+
+    # Persistence (NEW)
+    state_db_path: Path = Field(
+        default_factory=lambda: _default_project_root() / "data" / "state" / "agent_state.sqlite"
     )
 
     # Audit logs
@@ -73,6 +81,9 @@ class Settings(BaseSettings):
     agent_max_iterations: int = 5
     agent_verbose: bool = False
     confidence_threshold: float = 0.75
+    
+    # Memory Management (NEW)
+    max_history_messages: int = 20
 
     class Config:
         env_file = ".env"
